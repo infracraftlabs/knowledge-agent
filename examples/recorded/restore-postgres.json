@@ -1,0 +1,25 @@
+{
+  "claims": [
+    {
+      "text": "Restore into a new, empty database, never over the live one: create it with createdb, then run pg_restore with four parallel jobs.",
+      "citations": [
+        {"path": "docs/runbooks/restore-postgres-backup.md", "heading": "Restore a Postgres backup > Restore into a new database", "quote": "createdb -h db.example.com -U restore_user orders_restore"},
+        {"path": "docs/runbooks/restore-postgres-backup.md", "heading": "Restore a Postgres backup > Restore into a new database", "quote": "pg_restore -h db.example.com -U restore_user -d orders_restore -j 4"}
+      ]
+    },
+    {
+      "text": "Afterwards compare row counts for the orders and payments tables; more than 1% difference means the dump is incomplete.",
+      "citations": [
+        {"path": "docs/runbooks/restore-postgres-backup.md", "heading": "Restore a Postgres backup > Check the restore", "quote": "A difference of more than 1% means the dump is incomplete"}
+      ]
+    },
+    {
+      "text": "The restore usually takes about ten minutes.",
+      "citations": [
+        {"path": "docs/runbooks/restore-postgres-backup.md", "heading": "Restore a Postgres backup", "quote": "A restore takes about ten minutes"}
+      ]
+    }
+  ],
+  "confidence": "high",
+  "not_covered": false
+}

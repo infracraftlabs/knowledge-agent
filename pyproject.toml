@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "runbookqa"
+version = "0.1.0"
+description = "Cited answers from your own runbooks and module READMEs, using a local model."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.6,<3",
+  "httpx>=0.27,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9"]
+
+[project.scripts]
+runbookqa = "runbookqa.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: needs a running Ollama model (skipped by default)"]
+addopts = "-m 'not live'"

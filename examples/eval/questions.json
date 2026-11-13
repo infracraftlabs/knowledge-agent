@@ -1,0 +1,16 @@
+[
+  {"question": "When does the TLS certificate need rotating and how?", "expected": "docs/runbooks/rotate-tls-certificate.md"},
+  {"question": "How do I check cert-manager is healthy?", "expected": "docs/runbooks/rotate-tls-certificate.md"},
+  {"question": "Where are the nightly Postgres backups stored?", "expected": "docs/runbooks/restore-postgres-backup.md"},
+  {"question": "How do I compare row counts after a restore?", "expected": "docs/runbooks/restore-postgres-backup.md"},
+  {"question": "How do I add replicas during a traffic spike?", "expected": "docs/runbooks/scale-deployment.md"},
+  {"question": "What are the default HPA minReplicas and maxReplicas?", "expected": "docs/runbooks/scale-deployment.md"},
+  {"question": "How do we move CI from stored keys to OIDC?", "expected": "docs/runbooks/ci-deploy-keys-to-oidc.md"},
+  {"question": "What does the incoming on-call engineer check at handover?", "expected": "docs/runbooks/oncall-handover.md"},
+  {"question": "Which outputs does the network module return?", "expected": "docs/modules/network/README.md"},
+  {"question": "What is the default TTL of the dns-record module?", "expected": "docs/modules/dns-record/README.md"},
+  {"question": "What sections go in an incident document timeline?", "expected": "docs/templates/incident-template.md"},
+  {"question": "How do I undo a bad rollout?", "expected": "docs/runbooks/rollback-release.md"},
+  {"question": "The build node disk is full, how do I prune docker images?", "expected": "docs/runbooks/clear-disk-space.md"},
+  {"question": "break-glass emergency admin access", "expected": "docs/restricted/break-glass-access.md", "access": ["platform-admins"]}
+]
