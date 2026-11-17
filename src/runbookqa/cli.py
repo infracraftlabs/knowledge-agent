@@ -57,6 +57,10 @@ def cmd_index(args: argparse.Namespace) -> int:
     stats = build_index(args.dirs, args.db)
     print(f"Indexed {stats.files} file(s) into {stats.chunks} section(s): {args.db}")
     print(f"Redacted at index time: {stats.redaction_total} item(s)")
+    if stats.skipped:
+        print(f"Skipped (unreadable front matter, so its access tag can't be trusted): {len(stats.skipped)}")
+        for s in stats.skipped:
+            print(f"  - {s}")
     for path, counts in sorted(stats.redactions.items()):
         print(f"  {path}: " + ", ".join(f"{k}: {v}" for k, v in sorted(counts.items())))
     if stats.redactions:

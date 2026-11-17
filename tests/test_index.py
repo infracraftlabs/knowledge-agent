@@ -82,3 +82,17 @@ def test_git_commit_is_read_without_git_binary(tmp_path):
     assert search(db, "quokka")[0].commit.startswith("3f9a2c1b")
     (tmp_path / "plain").mkdir()
     assert git_commit(tmp_path / "plain") == ""  # outside a repo: empty, never an error
+
+
+def test_tagged_file_with_bom_stays_hidden_from_untagged_search(tmp_path):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "restricted.md").write_text("﻿---\naccess: platform-admins\n---\n# Break glass\n\nThe zebra procedure.\n",
+                                        encoding="utf-8")
+    (docs / "broken.md").write_text("---\naccess: platform-admins\n# Unclosed\n\nThe zebra secret.\n", encoding="utf-8")
+    stats = build_index([docs], tmp_path / "i.db")
+    assert stats.files == 1 and any("broken.md" in s for s in stats.skipped)  # unclosed block: skipped, not indexed
+    assert search(tmp_path / "i.db", "zebra") == []  # untagged reader sees nothing
+    hits = search(tmp_path / "i.db", "zebra", access=["platform-admins"])
+    assert [h.access for h in hits] == ["platform-admins"]
+    assert all("access:" not in h.body for h in hits)  # front matter is not indexed as text

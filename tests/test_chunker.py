@@ -48,3 +48,26 @@ def test_front_matter_access_tag():
     assert meta["access"] == "platform-admins"
     assert rest.startswith("# X")
     assert parse_front_matter("# No front matter")[0] == {}
+
+
+# Access tags must never be lost (fail closed). Found in an editorial audit, 2026-11-17.
+import pytest
+
+from runbookqa.chunker import FrontMatterError
+
+
+@pytest.mark.parametrize("prefix", ["﻿", "\n", "\n\n", "  \n", "﻿\n"])
+def test_front_matter_survives_bom_and_leading_blank_lines(prefix):
+    meta, rest = parse_front_matter(prefix + "---\naccess: platform-admins\n---\n# X\n\nBody")
+    assert meta["access"] == "platform-admins"
+    assert rest.startswith("# X")
+
+
+def test_front_matter_allows_trailing_spaces_on_markers():
+    meta, _ = parse_front_matter("--- \naccess: secret-team\n---  \n# X")
+    assert meta["access"] == "secret-team"
+
+
+def test_unclosed_front_matter_is_refused():
+    with pytest.raises(FrontMatterError):
+        parse_front_matter("---\naccess: platform-admins\n# X\n\nBody without a closing marker")

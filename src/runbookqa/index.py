@@ -16,7 +16,7 @@ import sqlite3
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .chunker import Chunk, chunk_markdown, parse_front_matter
+from .chunker import Chunk, FrontMatterError, chunk_markdown, parse_front_matter
 from .opscore.redact import redact
 
 MARKDOWN_SUFFIXES = {".md", ".markdown"}
@@ -48,6 +48,7 @@ class IndexStats:
     chunks: int = 0
     redactions: dict[str, dict[str, int]] = field(default_factory=dict)  # path -> kind -> count
     flagged: list[str] = field(default_factory=list)  # "path > heading" with instruction-like text
+    skipped: list[str] = field(default_factory=list)  # "path: reason" for files not indexed (fail closed)
 
     @property
     def redaction_total(self) -> int:
@@ -117,7 +118,12 @@ def build_index(directories: list[str | Path], db_path: str | Path) -> IndexStat
             sha = git_commit(directory)
             for file in iter_markdown(directory):
                 rel = f"{directory.name}/{file.relative_to(directory).as_posix()}"
-                meta, body = parse_front_matter(file.read_text(encoding="utf-8", errors="replace"))
+                try:
+                    # utf-8-sig drops a byte-order mark, which would otherwise hide the front matter.
+                    meta, body = parse_front_matter(file.read_text(encoding="utf-8-sig", errors="replace"))
+                except FrontMatterError as e:
+                    stats.skipped.append(f"{rel}: {e}")
+                    continue
                 cleaned = redact(body)
                 if cleaned.counts:
                     stats.redactions[rel] = cleaned.counts

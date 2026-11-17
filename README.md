@@ -73,7 +73,11 @@ pgvector, compared against this baseline, are the documented next step.
   files so you can fix the source.
 - **Access tags:** sections tagged `access: <tag>` are filtered out before anything reaches the
   model unless the caller passes that tag. This is a filter, not authentication: anyone who can
-  read the index file can read every section. Use one index per audience.
+  read the index file can read every section. Use one index per audience. Front matter is read
+  even after a byte-order mark or blank lines, and a file whose front matter opens but never
+  closes is skipped and reported, never indexed without its tag (fail closed). Before
+  2026-11-17 such files were indexed as untagged and visible to everyone; re-index if you used
+  an earlier version.
 - **Prompt injection in documents:** retrieved text is wrapped and labelled as data, the model
   has no tools to misuse, it only sees sections the access filter allowed, and every citation
   must quote a retrieved section. Sections containing instruction-like text are flagged at

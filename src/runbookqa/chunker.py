@@ -23,19 +23,34 @@ class Chunk:
     flagged: bool = False  # contains text that looks like instructions to an AI
 
 
+class FrontMatterError(ValueError):
+    """A file starts like front matter but it can't be read. Such files are skipped, never indexed
+    without their access tag (fail closed)."""
+
+
+_OPEN = re.compile(r"\A---[ \t]*\n")
+_CLOSE = re.compile(r"\n---[ \t]*(?:\n|\Z)")
+
+
 def parse_front_matter(text: str) -> tuple[dict[str, str], str]:
-    """Very small front-matter reader: `key: value` lines between two `---` lines."""
-    if not text.startswith("---\n"):
+    """Very small front-matter reader: `key: value` lines between two `---` lines.
+
+    Tolerates a byte-order mark, leading blank lines and trailing spaces on the `---` lines, so an
+    access tag is never silently ignored. Raises FrontMatterError when a block opens but never closes.
+    """
+    stripped = text.lstrip("\ufeff").lstrip(" \t\r\n")
+    if not _OPEN.match(stripped):
         return {}, text
-    end = text.find("\n---", 4)
-    if end == -1:
-        return {}, text
+    start = _OPEN.match(stripped).end()
+    close = _CLOSE.search(stripped, start - 1)
+    if close is None:
+        raise FrontMatterError("front matter opens with --- but never closes")
     meta: dict[str, str] = {}
-    for line in text[4:end].splitlines():
+    for line in stripped[start:close.start()].splitlines():
         if ":" in line and not line.startswith((" ", "#")):
             key, value = line.split(":", 1)
             meta[key.strip().lower()] = value.strip().strip("\"'")
-    rest = text[end + 4:]
+    rest = stripped[close.end():]
     return meta, rest.lstrip("\n")
 
 
